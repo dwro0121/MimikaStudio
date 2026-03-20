@@ -43,13 +43,36 @@ if ! command -v brew &> /dev/null; then
 fi
 ok "Homebrew"
 
-# Python 3
-if ! command -v python3 &> /dev/null; then
-    warn "Python3 not found. Installing via Homebrew..."
-    brew install python@3.11
+# Python 3.10-3.12 required (kokoro package constraint)
+find_python() {
+    for version in "3.12" "3.11" "3.10" "3.13"; do
+        if command -v "python${version}" &> /dev/null; then
+            echo "python${version}"
+            return 0
+        fi
+    done
+    return 1
+}
+
+PYTHON_CMD=$(find_python)
+if [ -z "$PYTHON_CMD" ]; then
+    warn "Python 3.10-3.12 not found. Installing Python 3.12 via Homebrew..."
+    brew install python@3.12
+    PYTHON_CMD="python3.12"
 fi
-PYTHON_VERSION=$(python3 --version)
-ok "$PYTHON_VERSION"
+
+# Verify version is within supported range
+PYTHON_VERSION=$($PYTHON_CMD --version | grep -oE '[0-9]+\.[0-9]+')
+PYTHON_MAJOR=$(echo "$PYTHON_VERSION" | cut -d. -f1)
+PYTHON_MINOR=$(echo "$PYTHON_VERSION" | cut -d. -f2)
+
+if [ "$PYTHON_MAJOR" -eq 3 ] && [ "$PYTHON_MINOR" -ge 10 ] && [ "$PYTHON_MINOR" -le 12 ]; then
+    ok "$PYTHON_CMD ($($PYTHON_CMD --version))"
+else
+    fail "Python $PYTHON_VERSION is not supported. Requires Python 3.10-3.12."
+    fail "Install: brew install python@3.12"
+    exit 1
+fi
 
 # espeak-ng (required by Kokoro TTS)
 if ! command -v espeak-ng &> /dev/null; then
@@ -72,11 +95,11 @@ echo ""
 info "Setting up Python virtual environment..."
 
 if [ ! -x "$VENV_DIR/bin/python" ]; then
-    python3 -m venv "$VENV_DIR"
+    $PYTHON_CMD -m venv "$VENV_DIR"
     ok "Created venv at $VENV_DIR"
 else
     # Refresh scripts/symlinks in case the repo was moved and old shebangs are stale.
-    python3 -m venv --upgrade "$VENV_DIR"
+    $PYTHON_CMD -m venv --upgrade "$VENV_DIR"
     ok "Refreshed venv at $VENV_DIR"
 fi
 
