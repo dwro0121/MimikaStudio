@@ -201,7 +201,8 @@ The script will:
 1. Check / install Homebrew, Python 3, espeak-ng, and ffmpeg
 2. Create a Python venv in the project root (`./venv`)
 3. Install **all** Python dependencies from the root `requirements.txt`
-4. Install `chatterbox-tts` with `--no-deps` (its runtime deps are already in `requirements.txt`)
+4. Install **backend-specific dependencies** from `backend/requirements.txt` (e.g., mlx-audio)
+5. Install `chatterbox-tts` with `--no-deps` (its runtime deps are already in `requirements.txt`)
 5. Download the **Dicta ONNX** Hebrew diacritizer model (~1.1 GB) for Chatterbox Hebrew TTS (skip with `SKIP_DICTA=1`)
 6. Verify that every critical import works
 7. Initialize the SQLite database
@@ -232,6 +233,9 @@ pip install --upgrade pip
 
 # All Python dependencies (from project root)
 pip install -r requirements.txt
+
+# Backend-specific dependencies (e.g., mlx-audio for Kokoro model download)
+pip install -r backend/requirements.txt
 
 # Chatterbox TTS (--no-deps to avoid version conflicts with its strict pins)
 pip install --no-deps chatterbox-tts==0.1.6

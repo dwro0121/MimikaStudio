@@ -121,6 +121,12 @@ info "Installing Python dependencies from requirements.txt..."
 "$VENV_PYTHON" -m pip install -r "$ROOT_DIR/requirements.txt"
 ok "Core dependencies installed"
 
+# Install backend-specific dependencies (e.g., mlx-audio for Kokoro model download)
+echo ""
+info "Installing backend dependencies..."
+"$VENV_PYTHON" -m pip install -r "$BACKEND_DIR/requirements.txt"
+ok "Backend dependencies installed"
+
 # Chatterbox TTS must be installed with --no-deps because its pinned versions
 # conflict with the rest of the stack. Its actual runtime dependencies
 # (omegaconf, resemble-perth, conformer, etc.) are already in requirements.txt.
