@@ -292,8 +292,10 @@ build_flutter() {
 # ============== Model Functions ==============
 
 download_models() {
+    (
     echo -e "${BLUE}Downloading models...${NC}"
     source "$VENV_DIR/bin/activate"
+    cd "$BACKEND_DIR"
 
     # Models are auto-downloaded on first use
     # This just pre-warms them
@@ -306,6 +308,7 @@ get_kokoro_engine().load_model()
 print('All models loaded.')
 "
     echo -e "${GREEN}Models ready${NC}"
+    )
 }
 
 # ============== MCP Functions ==============
